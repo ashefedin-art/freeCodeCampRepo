@@ -1,0 +1,87 @@
+** start of main.py **
+
+start = '12:01 AM'
+duration = '1:10'
+
+def add_time(start, duration, day_of_week = None):
+    # --- 1. PARSE INPUTS ---
+
+    # Split start time into hours, minutes, and period (AM/PM)
+    start_time_parts = start.split()
+    time_part = start_time_parts[0]
+    period = start_time_parts[1]
+    start_hour, start_minute = map(int, time_part.split(':'))
+
+    # Split duration time into hours and minutes
+    duration_hour, duration_minute = map(int, duration.split(':'))
+    
+    # --- 2. CONVERT TO 24-HOUR FORMAT & CALCULATE TOTALS ---
+
+    # Convert start hour to 24-hour format for easier calculation
+    if period == 'PM' and start_hour != 12:
+        start_hour += 12
+    if period == 'AM' and start_hour == 12:  # Handle midnight case
+        start_hour = 0
+
+    # Calculate total minutes and carry-over hours
+    total_minutes = start_minute + duration_minute
+    extra_hours = total_minutes // 60
+    new_minute = total_minutes % 60
+
+    # Calculate total hours and the number of days that have passed
+    total_hours = start_hour + duration_hour + extra_hours
+    days_passed = total_hours // 24
+    new_hour_24 = total_hours % 24
+
+    # --- 3. FORMAT THE OUTPUT ---
+
+    # Determine the new period (AM/PM)
+    if new_hour_24 >= 12:
+        new_period = 'PM'
+    else:
+        new_period = 'AM'
+
+    # Convert the 24-hour format back to 12-hour format for display
+    if new_hour_24 == 0:
+        new_hour_12 = 12
+    elif new_hour_24 > 12:
+        new_hour_12 = new_hour_24 - 12
+    else:
+        new_hour_12 = new_hour_24
+
+    # Format the minutes to always have two digits (e.g., '05')
+    # The .zfill(2) method pads the string with leading zeros to a width of 2
+    formatted_minute = str(new_minute).zfill(2)
+
+    # --- 4. CONSTRUCT THE RESULT STRING ---
+
+    # Start with the new time
+    result = f"{new_hour_12}:{formatted_minute} {new_period}"
+
+    # Add the day of the week if the optional parameter was provided
+    if day_of_week:
+        days_of_the_week = [
+            "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
+        ]
+        # Find the index of the starting day (case-insensitive)
+        start_day_index = days_of_the_week.index(day_of_week.capitalize())
+        # Calculate the new day's index
+        new_day_index = (start_day_index + days_passed) % 7
+        new_day = days_of_the_week[new_day_index]
+        result += f", {new_day}"
+
+    # Add the "(next day)" or "(n days later)" text if needed
+    if days_passed == 1:
+        result += " (next day)"
+    elif days_passed > 1:
+        result += f" ({days_passed} days later)"
+
+    return result
+
+
+
+
+    return new_time
+
+** end of main.py **
+

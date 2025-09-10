@@ -1,0 +1,60 @@
+def create_spend_chart(categories):
+    """Creates a bar chart of spending percentages for a list of categories."""
+    chart = "Percentage spent by category\n"
+    
+    # --- Calculate spending totals and percentages ---
+    category_spendings = []
+    total_spent = 0
+    
+    for category in categories:
+        spent_in_category = 0
+        for item in category.ledger:
+            if item["amount"] < 0: # It's a withdrawal
+                spent_in_category += abs(item["amount"])
+        category_spendings.append(spent_in_category)
+        total_spent += spent_in_category
+
+    # Calculate percentages and round down to the nearest 10
+    percentages = []
+    for spending in category_spendings:
+        # Calculate percentage of total spending
+        percentage = (spending / total_spent) * 100
+        # Round down to the nearest 10
+        rounded_percentage = int(percentage // 10) * 10
+        percentages.append(rounded_percentage)
+
+    # --- Build the chart lines ---
+    # 1. Y-Axis and Bars (100 down to 0)
+    for i in range(100, -1, -10):
+        # Y-axis label (e.g., "100|", " 90|", "  0|")
+        chart += str(i).rjust(3) + "| "
+        # Bars for each category
+        for p in percentages:
+            if p >= i:
+                chart += "o  "  # Add a bar segment
+            else:
+                chart += "   "  # Add empty space
+        chart += "\n"
+
+    # 2. Dashed Line Separator
+    chart += "    " + "-" * (len(categories) * 3 + 1) + "\n"
+
+    # --- Build the vertical category names ---
+    # 3. X-Axis Labels (Category Names)
+    max_name_length = 0
+    for category in categories:
+        if len(category.name) > max_name_length:
+            max_name_length = len(category.name)
+
+    for i in range(max_name_length):
+        chart += "     "  # Initial padding
+        for category in categories:
+            if i < len(category.name):
+                chart += category.name[i] + "  "
+            else:
+                chart += "   "
+        # Add a newline, but not for the very last line
+        if i < max_name_length - 1:
+            chart += "\n"
+            
+    return chart

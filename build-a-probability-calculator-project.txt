@@ -1,0 +1,95 @@
+** start of main.py **
+
+import random
+import copy
+
+class Hat:
+    """
+    Represents a hat containing a variable number of colored balls.
+    """
+    def __init__(self, **kwargs):
+        """
+        Initializes the hat with balls.
+
+        Args:
+            **kwargs: Variable keyword arguments where keys are colors (str)
+                      and values are the number of balls of that color (int).
+        """
+        self.contents = []
+        for color, count in kwargs.items():
+            self.contents.extend([color] * count)
+
+    def draw(self, num_balls_to_draw):
+        """
+        Removes a specified number of balls at random from the contents.
+
+        Args:
+            num_balls_to_draw (int): The number of balls to draw.
+
+        Returns:
+            A list of strings representing the balls drawn. If the number
+            to draw is greater than the available quantity, it returns all balls.
+        """
+        # If the number to draw is too high, we draw all the balls.
+        if num_balls_to_draw >= len(self.contents):
+            # Make a copy of the current contents to return
+            all_balls = self.contents[:]
+            # Empty the hat since all balls were drawn
+            self.contents.clear()
+            return all_balls
+
+        drawn_balls = []
+        # Draw balls one-by-one without replacement
+        for _ in range(num_balls_to_draw):
+            # Pick a random ball from the hat
+            index = random.randrange(len(self.contents))
+            ball = self.contents.pop(index)
+            drawn_balls.append(ball)
+        
+        return drawn_balls
+
+def experiment(hat, expected_balls, num_balls_drawn, num_experiments):
+    """
+    Performs a Monte Carlo simulation to estimate a probability.
+
+    Args:
+        hat (Hat): A hat object.
+        expected_balls (dict): The group of balls to attempt to draw.
+        num_balls_drawn (int): The number of balls to draw in each experiment.
+        num_experiments (int): The number of experiments to perform.
+
+    Returns:
+        The approximate probability as a float.
+    """
+    successful_draws = 0
+    
+    # Run the experiment multiple times
+    for _ in range(num_experiments):
+        # Create a fresh copy of the hat for each new experiment
+        hat_copy = copy.deepcopy(hat)
+        
+        # Draw the balls
+        drawn_balls = hat_copy.draw(num_balls_drawn)
+        
+        # Count the number of balls of each color that were drawn
+        drawn_counts = {}
+        for ball in drawn_balls:
+            drawn_counts[ball] = drawn_counts.get(ball, 0) + 1
+            
+        # Check if the draw was successful
+        is_success = True
+        for color, required_count in expected_balls.items():
+            # Get the actual count of the current color, defaulting to 0 if not found
+            actual_count = drawn_counts.get(color, 0)
+            if actual_count < required_count:
+                is_success = False
+                break  # If any color requirement isn't met, the draw fails
+        
+        if is_success:
+            successful_draws += 1
+            
+    # Calculate the final probability
+    return successful_draws / num_experiments
+
+** end of main.py **
+
